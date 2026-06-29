@@ -2,6 +2,9 @@
 
 A production-ready UI automation framework built with **Playwright + Pytest** for validating the [Books to Scrape](https://books.toscrape.com/index.html) website.
 
+## Quick Preview
+<img width="1920" height="1080" alt="Screenshot from 2026-06-29 16-53-06" src="https://github.com/user-attachments/assets/b51622ac-b220-4ed2-bf48-19bdb79eed9d" />
+
 ---
 
 ## Project Overview
