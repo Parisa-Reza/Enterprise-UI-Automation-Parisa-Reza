@@ -1,0 +1,95 @@
+name: Playwright UI Automation Suite
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  test-execution:
+    name: Run Automation Tests
+    runs-on: ubuntu-latest
+
+    steps:
+    # Checkout repository code
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Set up Python environment
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.12'
+        cache: 'pip'
+
+    # Install framework library dependencies
+    - name: Install Dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    # Install Playwright browser instances
+    - name: Install Playwright Browsers
+      run: |
+        playwright install chromium --with-deps
+
+    #  Execute all tests
+    - name: Execute Test Suite
+      run: |
+        pytest -v --alluredir=allure-results
+
+    #  Upload HTML Report 
+    - name: Upload HTML Test Report
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: html-execution-report
+        path: test-results/
+        retention-days: 14
+
+    #  Upload Captured Videos Folder
+    - name: Upload Videos Folder
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: automated-videos
+        path: videos/
+        retention-days: 14
+
+    #  Upload Screenshots Folder
+    - name: Upload Screenshots Folder
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: automated-screenshots
+        path: screenshots/
+        retention-days: 14
+
+    #  Upload Allure Raw Results Data
+    - name: Upload Allure Results Data
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: allure-results-data
+        path: allure-results/
+        retention-days: 14
+
+    # Generate Allure Report with History
+    - name: Generate Allure Report
+      if: always()
+      uses: simple-elf/allure-report-action@v1.9
+      id: allure-report
+      with:
+        allure_results: allure-results
+        allure_history: allure-history
+        keep_reports: 20
+
+    #  Deploy the compiled report to GitHub Pages
+    - name: Deploy Allure Report to GitHub Pages
+      if: always()
+      uses: peaceiris/actions-gh-pages@v4
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: allure-history
